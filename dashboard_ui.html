@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce Analytics & Google Maps Lead Scraper</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        gray: {
+                            50: '#f9fafb',
+                            100: '#f5f5f5',
+                            200: '#e5e7eb',
+                            300: '#d1d5db',
+                            400: '#9ca3af',
+                            500: '#6b7280',
+                            600: '#4b5563',
+                            700: '#374151',
+                            800: '#222222',
+                            900: '#111111',
+                            950: '#000000',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f5f5f5; color: #000000; }
+        .glass-card { background: #ffffff; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border-radius: 8px; }
+        .input-field { border: 1px solid #d1d5db; border-radius: 6px; padding: 0.5rem 0.75rem; width: 100%; transition: border-color 0.15s ease-in-out; outline: none; }
+        .input-field:focus { border-color: #000000; ring: 1px solid #000000; box-shadow: 0 0 0 1px #000000; }
+        .btn-primary { background-color: #000000; color: #ffffff; border-radius: 6px; padding: 0.5rem 1rem; font-weight: 500; transition: background-color 0.15s ease-in-out; }
+        .btn-primary:hover { background-color: #222222; }
+        .btn-secondary { background-color: #ffffff; color: #000000; border: 1px solid #d1d5db; border-radius: 6px; padding: 0.5rem 1rem; font-weight: 500; transition: all 0.15s ease-in-out; }
+        .btn-secondary:hover { background-color: #f9fafb; border-color: #000000; }
+        /* Toggle Switch */
+        .toggle-checkbox:checked { right: 0; border-color: #000000; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #000000; }
+        
+        /* Table Styles */
+        .data-table th { background-color: #f9fafb; color: #4b5563; font-weight: 500; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; }
+        .data-table td { padding: 0.875rem 1rem; border-bottom: 1px solid #e5e7eb; color: #111111; font-size: 0.875rem; }
+        .data-table tbody tr:nth-child(even) { background-color: #f9fafb; }
+        .data-table tbody tr:hover { background-color: #f5f5f5; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-gray-950">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-black text-white flex flex-col transition-all duration-300 hidden md:flex z-20 shadow-xl">
+        <div class="h-16 flex items-center px-6 border-b border-gray-800">
+            <i data-feather="hexagon" class="text-white w-6 h-6 mr-3"></i>
+            <span class="font-bold text-lg tracking-tight">EcoScrape</span>
+        </div>
+        
+        <nav class="flex-1 py-6 px-3 space-y-1">
+            <a href="#" class="flex items-center px-3 py-2.5 rounded-md hover:bg-gray-800 text-gray-300 hover:text-white transition-colors group">
+                <i data-feather="grid" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white transition-colors"></i>
+                <span class="font-medium text-sm">Dashboard</span>
+            </a>
+            <a href="#" class="flex items-center px-3 py-2.5 rounded-md hover:bg-gray-800 text-gray-300 hover:text-white transition-colors group">
+                <i data-feather="upload-cloud" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white transition-colors"></i>
+                <span class="font-medium text-sm">Data Upload</span>
+            </a>
+            <a href="#" class="flex items-center px-3 py-2.5 rounded-md bg-gray-800 text-white group">
+                <i data-feather="map-pin" class="w-5 h-5 mr-3 text-white"></i>
+                <span class="font-medium text-sm">Maps Scraper</span>
+                <span class="ml-auto bg-gray-700 text-xs py-0.5 px-2 rounded-full">Pro</span>
+            </a>
+            <a href="#" class="flex items-center px-3 py-2.5 rounded-md hover:bg-gray-800 text-gray-300 hover:text-white transition-colors group">
+                <i data-feather="bar-chart-2" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white transition-colors"></i>
+                <span class="font-medium text-sm">Analytics</span>
+            </a>
+            <a href="#" class="flex items-center px-3 py-2.5 rounded-md hover:bg-gray-800 text-gray-300 hover:text-white transition-colors group">
+                <i data-feather="settings" class="w-5 h-5 mr-3 text-gray-400 group-hover:text-white transition-colors"></i>
+                <span class="font-medium text-sm">Settings</span>
+            </a>
+        </nav>
+        
+        <div class="p-4 border-t border-gray-800">
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm font-bold border border-gray-600">
+                    JD
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium">John Doe</p>
+                    <p class="text-xs text-gray-400">Admin</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden bg-gray-50">
+        
+        <!-- Top Navbar -->
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-10 sticky top-0">
+            <div class="flex items-center">
+                <button class="md:hidden mr-4 text-gray-500 hover:text-gray-900 focus:outline-none">
+                    <i data-feather="menu" class="w-6 h-6"></i>
+                </button>
+                <h1 class="font-semibold text-gray-800 text-lg hidden sm:block">E-Commerce Analytics & Google Maps Lead Scraper</h1>
+                <h1 class="font-semibold text-gray-800 text-lg sm:hidden">EcoScrape</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="text-gray-400 hover:text-gray-900 transition-colors hidden sm:block">
+                    <i data-feather="bell" class="w-5 h-5"></i>
+                </button>
+                <button class="btn-secondary text-sm hidden sm:block">Documentation</button>
+                <button class="btn-primary text-sm flex items-center shadow-sm">
+                    <i data-feather="zap" class="w-4 h-4 mr-1.5"></i>
+                    Deploy
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Scrollable Area -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6 md:p-8 scroll-smooth">
+            
+            <div class="max-w-6xl mx-auto space-y-8">
+                
+                <!-- Section 1: Page Header -->
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-950 mb-2">E-Commerce Analytics</h2>
+                    <p class="text-gray-500 text-base">Transform raw sales data into actionable insights instantly.</p>
+                </div>
+
+                <!-- 4. File Upload Section -->
+                <div class="glass-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-lg flex items-center">
+                            <i data-feather="database" class="w-5 h-5 mr-2 text-gray-400"></i>
+                            Dataset Upload
+                        </h3>
+                    </div>
+                    <div class="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-10 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer group">
+                        <div class="p-4 bg-white rounded-full shadow-sm mb-4 group-hover:scale-105 transition-transform">
+                            <i data-feather="upload" class="w-6 h-6 text-gray-500"></i>
+                        </div>
+                        <p class="text-gray-700 font-medium mb-1">Drag & Drop CSV or Excel File</p>
+                        <p class="text-gray-400 text-sm">or click to browse from your computer</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Section 2: Google Maps Lead Scraper Card -->
+                    <div class="glass-card p-6 lg:col-span-1">
+                        <h3 class="font-semibold text-lg mb-5 flex items-center">
+                            <i data-feather="target" class="w-5 h-5 mr-2 text-gray-400"></i>
+                            Lead Scraper
+                        </h3>
+                        
+                        <form class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Search Query</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i data-feather="search" class="w-4 h-4 text-gray-400"></i>
+                                    </div>
+                                    <input type="text" class="input-field pl-10" placeholder="e.g. Plumbers in New York" value="Digital agencies in London">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Max Results</label>
+                                    <input type="number" class="input-field" value="50" min="1" max="500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Delay (s)</label>
+                                    <input type="number" class="input-field" value="2" min="1" max="10" step="0.5">
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between py-2 border-t border-b border-gray-100 mt-4">
+                                <label class="text-sm font-medium text-gray-700 flex flex-col">
+                                    <span>Headless Browser</span>
+                                    <span class="text-xs text-gray-400 font-normal mt-0.5">Run without opening UI</span>
+                                </label>
+                                <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                                    <input type="checkbox" name="toggle" id="toggle" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ease-in-out" checked/>
+                                    <label for="toggle" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors duration-200 ease-in-out"></label>
+                                </div>
+                            </div>
+                            
+                            <button type="button" class="btn-primary w-full flex items-center justify-center mt-6 py-2.5">
+                                <i data-feather="play" class="w-4 h-4 mr-2"></i>
+                                Scrape Google Maps
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Section 3: Data Table -->
+                    <div class="glass-card p-0 lg:col-span-2 flex flex-col h-[460px]">
+                        <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="font-semibold text-lg flex items-center">
+                                <i data-feather="list" class="w-5 h-5 mr-2 text-gray-400"></i>
+                                Extracted Leads
+                            </h3>
+                            <button class="btn-secondary text-xs flex items-center py-1.5 px-3">
+                                <i data-feather="download" class="w-3 h-3 mr-1.5"></i> Export CSV
+                            </button>
+                        </div>
+                        
+                        <div class="flex-1 overflow-auto rounded-b-lg">
+                            <table class="w-full text-left data-table whitespace-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th>Rating</th>
+                                        <th>Reviews</th>
+                                        <th>Phone</th>
+                                        <th>Website</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-gray-500 font-mono text-xs">#1</td>
+                                        <td class="font-medium text-gray-900">Acme Digital Agency</td>
+                                        <td>Marketing</td>
+                                        <td>
+                                            <div class="flex items-center text-sm">
+                                                <span class="font-medium mr-1.5">4.9</span>
+                                                <i data-feather="star" class="w-3 h-3 text-black fill-current"></i>
+                                            </div>
+                                        </td>
+                                        <td class="text-gray-500">128</td>
+                                        <td class="text-gray-500">+44 20 7123 4567</td>
+                                        <td><a href="#" class="text-gray-900 hover:underline">acmedigital.co.uk</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-gray-500 font-mono text-xs">#2</td>
+                                        <td class="font-medium text-gray-900">London Web Co</td>
+                                        <td>Web Design</td>
+                                        <td>
+                                            <div class="flex items-center text-sm">
+                                                <span class="font-medium mr-1.5">4.7</span>
+                                                <i data-feather="star" class="w-3 h-3 text-black fill-current"></i>
+                                            </div>
+                                        </td>
+                                        <td class="text-gray-500">84</td>
+                                        <td class="text-gray-500">+44 20 8987 6543</td>
+                                        <td><a href="#" class="text-gray-900 hover:underline">londonweb.com</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-gray-500 font-mono text-xs">#3</td>
+                                        <td class="font-medium text-gray-900">SEO Pros UK</td>
+                                        <td>SEO Agency</td>
+                                        <td>
+                                            <div class="flex items-center text-sm">
+                                                <span class="font-medium mr-1.5">5.0</span>
+                                                <i data-feather="star" class="w-3 h-3 text-black fill-current"></i>
+                                            </div>
+                                        </td>
+                                        <td class="text-gray-500">32</td>
+                                        <td class="text-gray-500">-</td>
+                                        <td><a href="#" class="text-gray-900 hover:underline">seopros.co.uk</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-gray-500 font-mono text-xs">#4</td>
+                                        <td class="font-medium text-gray-900">Creative Media</td>
+                                        <td>Marketing</td>
+                                        <td>
+                                            <div class="flex items-center text-sm">
+                                                <span class="font-medium mr-1.5">4.2</span>
+                                                <i data-feather="star" class="w-3 h-3 text-black fill-current"></i>
+                                            </div>
+                                        </td>
+                                        <td class="text-gray-500">210</td>
+                                        <td class="text-gray-500">+44 161 234 5678</td>
+                                        <td><a href="#" class="text-gray-900 hover:underline">creativemedia.com</a></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-gray-500 font-mono text-xs">#5</td>
+                                        <td class="font-medium text-gray-900">NextGen Studios</td>
+                                        <td>Software Dev</td>
+                                        <td>
+                                            <div class="flex items-center text-sm">
+                                                <span class="font-medium mr-1.5">4.8</span>
+                                                <i data-feather="star" class="w-3 h-3 text-black fill-current"></i>
+                                            </div>
+                                        </td>
+                                        <td class="text-gray-500">56</td>
+                                        <td class="text-gray-500">+44 113 456 7890</td>
+                                        <td><a href="#" class="text-gray-900 hover:underline">nextgen.io</a></td>
+                                    </tr>
+                                     <tr>
+                                        <td class="text-gray-500 font-mono text-xs">#6</td>
+                                        <td class="font-medium text-gray-900">Apex Marketing</td>
+                                        <td>Marketing</td>
+                                        <td>
+                                            <div class="flex items-center text-sm">
+                                                <span class="font-medium mr-1.5">4.6</span>
+                                                <i data-feather="star" class="w-3 h-3 text-black fill-current"></i>
+                                            </div>
+                                        </td>
+                                        <td class="text-gray-500">112</td>
+                                        <td class="text-gray-500">+44 20 1111 2222</td>
+                                        <td><a href="#" class="text-gray-900 hover:underline">apex-mktg.co.uk</a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Initialize Feather Icons -->
+    <script>
+        feather.replace();
+    </script>
+</body>
+</html>
