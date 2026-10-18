@@ -42,7 +42,11 @@ def _build_driver(headless: bool):
     chrome_options.binary_location = "/usr/bin/chromium"
     _add_browser_arguments(chrome_options, headless)
     try:
-        driver = webdriver.Chrome(options=chrome_options)
+        service = Service("/usr/bin/chromedriver")
+        driver = webdriver.Chrome(
+        service=service,
+        options=chrome_options
+        )
         driver.set_page_load_timeout(90)
         return driver
     except WebDriverException as exc:
@@ -52,10 +56,7 @@ def _build_driver(headless: bool):
     edge_options.use_chromium = True
     _add_browser_arguments(edge_options, headless)
     try:
-        driver = webdriver.Chrome(
-            service=Service("/usr/bin/chromedriver"),
-            options=chrome_options
-        )
+        driver = webdriver.Edge(options=edge_options)
         driver.set_page_load_timeout(90)
         return driver
     except WebDriverException as exc:
