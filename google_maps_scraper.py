@@ -25,12 +25,15 @@ DETAIL_NAME_SELECTORS = [
 ]
 
 
+
 def _add_browser_arguments(options, headless: bool) -> None:
-    options.add_argument("--guest")
-    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1440,2200")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--window-size=1280,800")
     options.add_argument("--lang=en")
+
     if headless:
         options.add_argument("--headless=new")
 
