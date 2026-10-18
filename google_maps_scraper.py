@@ -38,6 +38,7 @@ def _build_driver(headless: bool):
     errors = []
 
     chrome_options = webdriver.ChromeOptions()
+    chrome_options.binary_location = "/usr/bin/chromium"
     _add_browser_arguments(chrome_options, headless)
     try:
         driver = webdriver.Chrome(options=chrome_options)
