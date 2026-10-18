@@ -5,6 +5,7 @@ import time
 from urllib.parse import quote_plus
 
 import pandas as pd
+from selenium.webdriver.chrome.service import Service
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException, WebDriverException
 from selenium.webdriver.common.by import By
@@ -51,7 +52,10 @@ def _build_driver(headless: bool):
     edge_options.use_chromium = True
     _add_browser_arguments(edge_options, headless)
     try:
-        driver = webdriver.Edge(options=edge_options)
+        driver = webdriver.Chrome(
+            service=Service("/usr/bin/chromedriver"),
+            options=chrome_options
+        )
         driver.set_page_load_timeout(90)
         return driver
     except WebDriverException as exc:
